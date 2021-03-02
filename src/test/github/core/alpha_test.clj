@@ -11,14 +11,6 @@
    ))
 
 
-(deftest test-actions
-  (github/actions-list-jobs
-    {:github/owner          "ajchemist"
-     :github/repo           "user.core.async"
-     :github.actions/run-id 530723420})
-  )
-
-
 (defn took
   "Millis"
   [{:strs [started_at completed_at]}]
@@ -33,6 +25,21 @@
         time    (- time (* minutes 1000 60))
         seconds (Math/floor (/ time 1000))]
     [hours minutes seconds]))
+
+
+(deftest test-actions
+  (github/actions-list-jobs
+    {:github/owner          "ajchemist"
+     :github/repo           "user.core.async"
+     :github.actions/run-id 530723420})
+
+  (let [[owner repo] (str/split (System/getenv "GITHUB_REPOSITORY") #"/" 2)]
+    (prn
+      (github/actions-list-jobs
+        {:github/owner          owner
+         :github/repo           repo
+         :github.actions/run-id (System/getenv "GITHUB_RUN_ID")})))
+  )
 
 
 (comment
