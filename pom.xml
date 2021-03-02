@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ajchemist</groupId>
   <artifactId>github.clj.alpha</artifactId>
-  <version>2021.61.21618</version>
+  <version>2021.61.22144</version>
   <dependencies>
     <dependency>
       <groupId>caesium</groupId>
