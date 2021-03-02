@@ -102,6 +102,8 @@ jobs:
         env:
           LIBRARY: ajchemist/github.clj.alpha
         run: clojure -M:provided:test -m user.tools.deps.script.package -r $LIBRARY
+      - name: Edit pom
+        run: clojure -M:provided:test -m user.apache.maven.script.edit-pom --scm-url $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
 
 
       - name: Deploy
