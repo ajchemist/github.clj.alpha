@@ -1,0 +1,58 @@
+name: Main CI
+
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+
+jobs:
+  test:
+    if: "!(contains(github.event.head_commit.message, 'ci skip') || contains(github.event.head_commit.message, 'skip ci'))"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ "11" ]
+        clojure: [ "1.10" ]
+    name: test @ JDK = ${{ matrix.java }} CLJ = ${{ matrix.clojure }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache local maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/deps.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Cache gitlibs
+        uses: actions/cache@v2
+        with:
+          path: ~/.gitlibs
+          key: ${{ runner.os }}-gitlibs-${{ hashFiles('**/deps.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-gitlibs-
+
+
+      - name: Setup java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+
+      - name: Set up clojure-cli
+        uses: DeLaGuardo/setup-clojure@master
+        with:
+          cli: '1.10.2.796'
+
+
+      - name: Setup libsodium
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libsodium-dev
+
+
+      - name: Test runner
+        run: |
+          clojure -M:${{ matrix.clojure }}:provided:test:test-runner
