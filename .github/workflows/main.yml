@@ -54,6 +54,9 @@ jobs:
 
 
       - name: Test runner
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: |
           clojure -M:${{ matrix.clojure }}:provided:test:test-runner
 

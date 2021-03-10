@@ -31,9 +31,13 @@
   {:extra-paths ["src/test"]
    :extra-deps
    {
+    rum/rum                {:mvn/version "0.11.5"}
+    ajchemist/telegram.clj {:git/url "https://github.com/ajchemist/telegram.clj.git" :sha "0cfc72cbfcf0bc74c9fb65036ce644e5223eb2d5"}
+
+
     org.clojure/tools.deps.alpha                {:mvn/version "0.9.821"}
     user.java.time/user.java.time               {:mvn/version "2020.267.10158"}
-    user.tools.deps.alpha/user.tools.deps.alpha {:git/url "https://github.com/aJchemist/user.tools.deps.alpha.git" :sha "def2387722c2605c8f4a53111c1f9c3fda9c1484"}
+    user.tools.deps.alpha/user.tools.deps.alpha {:git/url "https://github.com/ajchemist/user.tools.deps.alpha.git" :sha "def2387722c2605c8f4a53111c1f9c3fda9c1484"}
     }}
 
 
