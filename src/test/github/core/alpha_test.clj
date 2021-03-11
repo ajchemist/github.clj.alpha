@@ -27,7 +27,7 @@
      :github.actions/run-id 530723420})
 
 
-  (let [[owner repo] (str/split (System/getenv "GITHUB_REPOSITORY") #"/" 2)]
+  (let [[owner repo] (github/repository->owner-repo (System/getenv "GITHUB_REPOSITORY"))]
     (prn
       (github/actions-list-jobs
         {:github/owner          owner
@@ -36,7 +36,7 @@
 
 
 (comment
-  (let [[owner repo]   (str/split (System/getenv "GITHUB_REPOSITORY") #"/" 2)
+  (let [[owner repo]   (github/repository->owner-repo (System/getenv "GITHUB_REPOSITORY"))
         {:strs [jobs]} (github/actions-list-jobs
                          {:github/owner          owner
                           :github/repo           repo

@@ -62,8 +62,13 @@ jobs:
 
 
       - name: Job digest -> telegram
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          JOB_CONTEXT: ${{ toJSON(job) }}
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
         run: |
-          clojure -X:provided:test github.core.alpha.actions-helper.telegram/send-job-digest :tg-token ${{ secrets.TG_TOKEN }} :tg-chat-id ${{ secrets.TG_CHAT_ID }} :github-context '${{ toJSON(github) }}' :job-context '${{ toJSON(github) }}'
+          clojure -X:provided:test github.core.alpha.actions-helper.telegram/send-job-digest :tg-token '"$TG_TOKEN"' :tg-chat-id '"$TG_CHAT_ID"'
 
 
   package:
