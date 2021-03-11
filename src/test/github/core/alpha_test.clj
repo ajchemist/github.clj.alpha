@@ -32,9 +32,10 @@
       (github/actions-list-jobs
         {:github/owner          owner
          :github/repo           repo
-         :github.actions/run-id (System/getenv "GITHUB_RUN_ID")})))
+         :github.actions/run-id (System/getenv "GITHUB_RUN_ID")}))))
 
 
+(comment
   (let [[owner repo]   (str/split (System/getenv "GITHUB_REPOSITORY") #"/" 2)
         {:strs [jobs]} (github/actions-list-jobs
                          {:github/owner          owner
@@ -55,10 +56,9 @@
          " "
          (str "by " (System/getenv "GITHUB_ACTOR"))
          " "
-         (str "in " (actions-helper/format-took (Instant/parse (get-in jobs [0 "started_at"]))))]))))
+         (str "in " (actions-helper/format-took (Instant/parse (get-in jobs [0 "started_at"]))))])))
 
 
-(comment
   (github/actions-run
     {:github/owner          "ajchemist"
      :github/repo           "github.clj.alpha"
