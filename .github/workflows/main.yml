@@ -61,6 +61,11 @@ jobs:
           clojure -M:${{ matrix.clojure }}:provided:test:test-runner
 
 
+      - name: Job digest -> telegram
+        run: |
+          clojure -X:provided:test github.core.alpha.actions-helper.telegram/send-job-digest :tg-token ${{ secrets.TG_TOKEN }} :tg-chat-id ${{ secrets.TG_CHAT_ID }} :github-context '${{ toJSON(github) }}' :job-context '${{ toJSON(github) }}'
+
+
   package:
     needs: [ test ]
     runs-on: ubuntu-latest
@@ -124,14 +129,6 @@ jobs:
           git commit -m "$(clojure -M:provided:test -m user.apache.maven.script.get-pom-version) [ci skip]"
           git remote -v
           git push
-
-
-      - name: Job digest -> telegram
-        env:
-          TG_TOKEN: ${{ secrets.TG_TOKEN }}
-          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-        run: |
-          clojure -X:provided:test github.core.alpha.actions-helper.telegram/send-job-digest :tg-token $TG_TOKEN :tg-chat-id $TG_CHAT_ID :github-context "${{ toJSON(github) }}" :job-context "${{ toJSON(github) }}"
 
 
       - uses: 8398a7/action-slack@v3.5.0
