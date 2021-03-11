@@ -73,7 +73,20 @@
      :url (str "https://api.github.com/repos/" owner "/" repo "/actions/runs/" run-id "/jobs")
      :method :get
      :as :json-strict-string-keys
-      :accept "application/vnd.github.v3+json")))
+     :accept "application/vnd.github.v3+json")))
+
+
+(defn actions-run
+  [{:keys [:github/owner
+           :github/repo
+           :github.actions/run-id]
+    :as   request-params}]
+  (client
+    (assoc request-params
+     :url (str "https://api.github.com/repos/" owner "/" repo "/actions/runs/" run-id)
+     :method :get
+     :as :json-strict-string-keys
+     :accept "application/vnd.github.v3+json")))
 
 
 (defn actions-run-job
@@ -83,10 +96,10 @@
     :as   request-params}]
   (client
     (assoc request-params
-     :url (str "https://api.github.com/repos/" owner "/" repo "/actions/jobs/" job-id)
-     :method :get
-     :as :json-strict-string-keys
-     :accept "application/vnd.github.v3+json")))
+      :url (str "https://api.github.com/repos/" owner "/" repo "/actions/jobs/" job-id)
+      :method :get
+      :as :json-strict-string-keys
+      :accept "application/vnd.github.v3+json")))
 
 
 ;; * repository
