@@ -10,6 +10,7 @@
              clojure.test
              reitit.core
              clj-http.client
+             cheshire.core
              ]}
   :unused-referred-var
   {:exclude {
