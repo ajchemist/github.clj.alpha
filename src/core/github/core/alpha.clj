@@ -1,5 +1,6 @@
 (ns github.core.alpha
   (:require
+   [clojure.string :as str]
    [clj-http.client :as http]
    [caesium.crypto.box :as box]
    [user.ring.alpha :as user.ring]
@@ -28,6 +29,11 @@
   ^bytes
   [^bytes s]
   (.encode (Base64/getEncoder) s))
+
+
+(defn repository->owner-repo
+  [repository]
+  (str/split repository #"/" 2))
 
 
 ;;
@@ -70,10 +76,10 @@
     :as   request-params}]
   (client
     (assoc request-params
-     :url (str "https://api.github.com/repos/" owner "/" repo "/actions/runs/" run-id "/jobs")
-     :method :get
-     :as :json-strict-string-keys
-     :accept "application/vnd.github.v3+json")))
+      :url (str "https://api.github.com/repos/" owner "/" repo "/actions/runs/" run-id "/jobs")
+      :method :get
+      :as :json-strict-string-keys
+      :accept "application/vnd.github.v3+json")))
 
 
 (defn actions-run
@@ -83,10 +89,10 @@
     :as   request-params}]
   (client
     (assoc request-params
-     :url (str "https://api.github.com/repos/" owner "/" repo "/actions/runs/" run-id)
-     :method :get
-     :as :json-strict-string-keys
-     :accept "application/vnd.github.v3+json")))
+      :url (str "https://api.github.com/repos/" owner "/" repo "/actions/runs/" run-id)
+      :method :get
+      :as :json-strict-string-keys
+      :accept "application/vnd.github.v3+json")))
 
 
 (defn actions-run-job
@@ -179,7 +185,7 @@
   (when *print* (println "Creating repository:" (get-in req [:form-params "name"])))
   (client
     (assoc req
-      :url          "https://api.github.com/user/repos"
+      :url "https://api.github.com/user/repos"
       :method       :post
       :content-type :json
       :as           :json-string-keys)))
