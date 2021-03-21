@@ -40,7 +40,8 @@
                       run_number
                       actor
                       server_url
-                      sha]}
+                      sha
+                      job]}
               (cheshire/decode github-context)
 
               [owner repo]
@@ -73,7 +74,9 @@
                " "
                (str "by " actor)
                " "
-               (str "in " (actions-helper/format-took (Instant/parse started_at)))])))
+               (str "in " (actions-helper/format-took (Instant/parse started_at)))
+               " "
+               [:i job]])))
         (catch Throwable e
           (stacktrace/print-stack-trace e 30)
           (throw e))))))
