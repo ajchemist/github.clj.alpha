@@ -57,7 +57,6 @@
           (tg/send-message
             tg-token
             tg-to
-            {:parse_mode "HTML" :disable_web_page_preview true}
             (tg/render-html-message
               rum/render-static-markup
               [(job-status-emoji (get job-context "status"))
@@ -76,7 +75,8 @@
                " "
                (str "in " (actions-helper/format-took (Instant/parse started_at)))
                " "
-               [:i job]])))
+               [:i job]])
+            {:parse_mode "HTML" :disable_web_page_preview true}))
         (catch Throwable e
           (stacktrace/print-stack-trace e 30)
           (throw e))))))

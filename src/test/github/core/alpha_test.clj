@@ -44,7 +44,6 @@
     (tg/send-message
       tg-token
       tg-chat-id
-      {:parse_mode "HTML" :disable_web_page_preview true}
       (tg/render-html-message
         rum/render-static-markup
         ["Run "
@@ -56,7 +55,8 @@
          " "
          (str "by " (System/getenv "GITHUB_ACTOR"))
          " "
-         (str "in " (actions-helper/format-took (Instant/parse (get-in jobs [0 "started_at"]))))])))
+         (str "in " (actions-helper/format-took (Instant/parse (get-in jobs [0 "started_at"]))))])
+      {:parse_mode "HTML" :disable_web_page_preview true}))
 
 
   (github/actions-run
