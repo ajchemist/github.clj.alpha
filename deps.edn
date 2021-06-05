@@ -16,7 +16,7 @@
   :provided
   {:extra-deps
    {
-    org.clojure/clojure {:mvn/version "1.10.2"}
+    org.clojure/clojure {:mvn/version "1.10.3"}
 
 
     rum/rum                {:mvn/version "0.11.5"}
@@ -27,7 +27,7 @@
   :1.10
   {:extra-deps
    {
-    org.clojure/clojure {:mvn/version "1.10.2"}
+    org.clojure/clojure {:mvn/version "1.10.3"}
     }}
 
 

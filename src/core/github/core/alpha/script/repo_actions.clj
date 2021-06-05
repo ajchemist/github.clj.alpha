@@ -1,7 +1,7 @@
 (ns github.core.alpha.script.repo-actions
   (:require
    [clojure.tools.cli :as cli]
-   [user.tools.github.alpha :as github]
+   [github.core.alpha :as github]
    ))
 
 
