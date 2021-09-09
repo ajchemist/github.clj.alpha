@@ -8,6 +8,11 @@ on:
     branches: [ master ]
 
 
+env:
+  clojure-cli: "1.10.3.967"
+  library: io.github.ajchemist/github.clj.alpha
+
+
 jobs:
   test:
     if: "!(contains(github.event.head_commit.message, 'ci skip') || contains(github.event.head_commit.message, 'skip ci'))"
@@ -16,6 +21,7 @@ jobs:
       matrix:
         java: [ "11" ]
         clojure: [ "1.10" ]
+
     name: test @ JDK = ${{ matrix.java }} CLJ = ${{ matrix.clojure }}
     steps:
       - uses: actions/checkout@v2
@@ -36,15 +42,16 @@ jobs:
 
 
       - name: Setup java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
+          distribution: 'zulu'
           java-version: ${{ matrix.java }}
 
 
       - name: Set up clojure-cli
         uses: DeLaGuardo/setup-clojure@master
         with:
-          cli: '1.10.2.796'
+          cli: ${{ env.clojure-cli }}
 
 
       - name: Setup libsodium
@@ -58,7 +65,7 @@ jobs:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: |
-          clojure -M:${{ matrix.clojure }}:provided:test:test-runner
+          clojure -X:${{ matrix.clojure }}:provided:test:test-runner
 
 
       - name: Job digest -> telegram
@@ -68,7 +75,7 @@ jobs:
           JOB_CONTEXT: ${{ toJSON(job) }}
           GITHUB_CONTEXT: ${{ toJSON(github) }}
         run: |
-          clojure -X:provided:test github.core.alpha.actions-helper.telegram/send-job-digest
+          clojure -X:provided:github-actions-helper send-job-digest
 
 
   package:
@@ -94,9 +101,10 @@ jobs:
 
       # This reset settings.xml
       - name: Setup java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 11
+          distribution: 'zulu'
+          java-version: '11'
 
 
       - name: Preparation
@@ -108,15 +116,12 @@ jobs:
       - name: Set up clojure-cli
         uses: DeLaGuardo/setup-clojure@master
         with:
-          cli: '1.10.2.796'
+          cli: ${{ env.clojure-cli }}
 
 
       - name: Make package
-        env:
-          LIBRARY: ajchemist/github.clj.alpha
-        run: clojure -M:provided:test -m user.tools.deps.script.package -r $LIBRARY
-      - name: Edit pom
-        run: clojure -M:provided:test -m user.apache.maven.script.edit-pom --scm-url $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+        run: |
+          clojure -T:provided:build jar :lib $library
 
 
       - name: Deploy
@@ -131,7 +136,7 @@ jobs:
           git config --local user.name "ajchemist"
           git config --local user.email "1694505+ajchemist@users.noreply.github.com"
           git add -- pom.xml
-          git commit -m "$(clojure -M:provided:test -m user.apache.maven.script.get-pom-version) [ci skip]"
+          git commit -m "$(clojure -X:build:maven-tool print-pom-version) [ci skip]"
           git remote -v
           git push
 
@@ -143,7 +148,7 @@ jobs:
           JOB_CONTEXT: ${{ toJSON(job) }}
           GITHUB_CONTEXT: ${{ toJSON(github) }}
         run: |
-          clojure -X:provided:test github.core.alpha.actions-helper.telegram/send-job-digest
+          clojure -X:provided:github-actions-helper send-job-digest
 
 
       - uses: 8398a7/action-slack@v3.5.0
