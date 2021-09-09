@@ -43,7 +43,7 @@
 
 
   :github-actions-helper
-  {:ns-default github.core.alpha.actions-helper.telegram}
+  {:ns-default github.core.alpha.actions-helper.api}
 
 
   :build
