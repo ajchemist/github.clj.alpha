@@ -26,8 +26,8 @@
   [{:keys
     [tg-token
      tg-to]}]
-  (let [tg-token       (or (System/getenv "TELEGRAM_TOKEN") tg-token)
-        tg-to          (or (System/getenv "TELEGRAM_TO") tg-to)
+  (let [tg-token       (str (or (System/getenv "TELEGRAM_TOKEN") tg-token))
+        tg-to          (str (or (System/getenv "TELEGRAM_TO") tg-to))
         job-context    (System/getenv "JOB_CONTEXT")
         github-context (System/getenv "GITHUB_CONTEXT")]
     (when (and (string? job-context) (string? github-context))
@@ -47,13 +47,14 @@
               [owner repo]
               (github/repository->owner-repo repository)
 
-              {:strs [started_at] :as _current-job}
+              {:strs [started_at check_run_url name] :as _current-job}
               (-> (github/actions-list-jobs
                     {:github/owner          owner
                      :github/repo           repo
                      :github.actions/run-id run_id})
                 (get "jobs")
-                (peek))]
+                (peek))                 ; FIXME
+              ]
           (tg/send-message
             tg-token
             tg-to
@@ -75,7 +76,9 @@
                " "
                (str "in " (actions-helper/format-took (Instant/parse started_at)))
                " "
-               [:i job]])
+               [:i job]
+               ": "
+               [:a {:href (str check_run_url)} name]])
             {:parse_mode "HTML" :disable_web_page_preview true}))
         (catch Throwable e
           (stacktrace/print-stack-trace e 30)
