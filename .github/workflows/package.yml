@@ -3,13 +3,20 @@ name: Main CI
 
 on:
   push:
+    paths:
+      - 'deps.edn'
+      - '.github/workflows/package.yml'
+      - 'src/core/**/*.clj'
+      - 'src/core/**/*.cljs'
+      - 'src/core/**/*.cljc'
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
 
 env:
-  clojure-cli: "1.10.3.967"
+  clojure-cli: "1.10.3.1075"
+  java-version: "17"
   library: io.github.ajchemist/github.clj.alpha
 
 
@@ -19,10 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ "11" ]
         clojure: [ "1.10" ]
 
-    name: test @ JDK = ${{ matrix.java }} CLJ = ${{ matrix.clojure }}
+    name: test @ CLJ = ${{ matrix.clojure }}
     steps:
       - uses: actions/checkout@v2
       - name: Cache local maven repository
@@ -45,11 +51,11 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
-          java-version: ${{ matrix.java }}
+          java-version: ${{ env.java-version }}
 
 
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@master
+        uses: DeLaGuardo/setup-clojure@3.7
         with:
           cli: ${{ env.clojure-cli }}
 
@@ -104,7 +110,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: ${{ env.java-version }}
 
 
       - name: Preparation
@@ -114,7 +120,7 @@ jobs:
 
 
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@master
+        uses: DeLaGuardo/setup-clojure@3.7
         with:
           cli: ${{ env.clojure-cli }}
 
