@@ -22,6 +22,10 @@
     "cancelled" "⚠"} status "❓"))
 
 
+;; refer to
+;; https://github.com/8398a7/action-slack/blob/master/src/fields.ts
+
+
 (defn send-job-digest
   [{:keys
     [tg-token
@@ -35,7 +39,8 @@
         (let [job-context
               (cheshire/decode job-context)
 
-              {:strs [repository
+              {:strs [workflow
+                      repository
                       run_id
                       run_number
                       actor
@@ -53,7 +58,7 @@
                      :github/repo           repo
                      :github.actions/run-id run_id})
                 (get "jobs")
-                (peek))                 ; FIXME
+                (peek)) ; FIXME
               ]
           (tg/send-message
             tg-token
@@ -61,6 +66,8 @@
             (tg/render-html-message
               rum/render-static-markup
               [(job-status-emoji (get job-context "status"))
+               " "
+               [:a {:href (str server_url "/" repository "/commit/" sha "/checks")} workflow]
                " "
                [:a {:href (str server_url "/" repository "/actions/runs/" run_id)} (str "#" run_number)]
                " "
