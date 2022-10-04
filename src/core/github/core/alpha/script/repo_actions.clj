@@ -6,14 +6,12 @@
 
 
 (def cli-options--list-secrets
-  [[nil "--owner OWNER" ":github/owner"]
-   [nil "--repo REPO" ":github/repo"]
+  [[nil "--repository REPOSITORY" ":github/repository"]
    [nil "--basic-auth BASIC_AUTH" ":basic-auth"]])
 
 
 (def cli-options--put-secret
-  [[nil "--owner OWNER" ":github/owner"]
-   [nil "--repo REPO" ":github/repo"]
+  [[nil "--repository REPOSITORY" ":github/repository"]
    [nil "--secret-name SECRET_NAME" ":github.actions.secrets/secret-name"]
    [nil "--secret-value SECRET_VALUE" ":github.actions.secrets/secret-value"]
    [nil "--key KEY" ":github.actions.secrets/public-key"]
@@ -26,29 +24,20 @@
   (case op
     "list-secrets"
     (let [{:keys [options] :as _parsed}   (cli/parse-opts xs cli-options--list-secrets)
-          {:keys [owner repo basic-auth]} options]
-      (prn
-        (github/actions-list-repo-secrets
-          {:github/owner owner
-           :github/repo  repo
-           :basic-auth   basic-auth})))
+          {:keys [repository basic-auth]} options]
+      (prn (github/actions-list-repo-secrets {:basic-auth basic-auth} repository)))
 
 
     "put-secret"
     (let [{:keys [options] :as _parsed} (cli/parse-opts xs cli-options--put-secret)
-          {:keys [owner repo
-                  secret-name secret-value
+
+          {:keys [repository
+                  secret-name
+                  secret-value
                   key key-id
-                  basic-auth]}          options]
+                  basic-auth]} options]
       (prn
-        (github/actions-put-repo-secret
-          {:github/owner                         owner
-           :github/repo                          repo
-           :github.actions.secrets/secret-name   secret-name
-           :github.actions.secrets/secret-value  secret-value
-           :github.actions.secrets/public-key    key
-           :github.actions.secrets/public-key-id key-id
-           :basic-auth                           basic-auth})))
+        (github/actions-put-repo-secret {:basic-auth basic-auth} repository secret-name secret-value key key-id)))
 
 
     (println "Unknown operation:" op)))

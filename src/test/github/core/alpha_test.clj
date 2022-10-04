@@ -2,6 +2,7 @@
   (:require
    [clojure.test :as test :refer [deftest is are testing]]
    [clojure.string :as str]
+   [clojure.java.shell :as jsh]
    [clj-http.client :as http]
    [github.core.alpha :as github]
    [github.core.alpha.actions-helper :as actions-helper]
@@ -13,62 +14,44 @@
    ))
 
 
-(def tg-token (System/getenv "TG_TOKEN"))
-(def tg-chat-id (System/getenv "TG_CHAT_ID"))
+(defn pass
+  [pass-name]
+  (str/trim-newline (:out (jsh/sh "pass" pass-name))))
 
 
 (def github-envs (actions-helper/envs))
 
 
+(comment
+  (tg/get-updates tg-token nil)
+  )
+
+
 (deftest test-actions
-  (github/actions-list-jobs
-    {:github/owner          "ajchemist"
-     :github/repo           "user.core.async"
-     :github.actions/run-id 530723420})
+  #_(github/actions-run-job nil "ajchemist/user.core.async" 2789017092)
+  (prn (github/actions-list-jobs nil (System/getenv "GITHUB_REPOSITORY") (System/getenv "GITHUB_RUN_ID")))
+  (prn (github/actions-run nil (System/getenv "GITHUB_REPOSITORY") (System/getenv "GITHUB_RUN_ID")))
+  #_(prn (github/actions-run-job nil (System/getenv "GITHUB_REPOSITORY") (System/getenv "GITHUB_JOB_ID")))
 
-
-  (let [[owner repo] (github/repository->owner-repo (System/getenv "GITHUB_REPOSITORY"))]
-    (prn
-      (github/actions-list-jobs
-        {:github/owner          owner
-         :github/repo           repo
-         :github.actions/run-id (System/getenv "GITHUB_RUN_ID")}))))
+  ;; secrets.GITHUB_TOKEN
+  ;; -> basic-auth fail
+  ;; Resource not accessible by integration
+  #_(prn
+    (github/actions-get-repo-public-key
+      {:basic-auth [(System/getenv "GITHUB_ACTOR") (System/getenv "GITHUB_TOKEN")]}
+      (System/getenv "GITHUB_REPOSITORY")))
+  #_(prn
+    (github/actions-put-repo-secret
+      {:basic-auth [(System/getenv "GITHUB_ACTOR") (System/getenv "GITHUB_TOKEN")]}
+      (System/getenv "GITHUB_REPOSITORY")
+      "TEST_SECRET"
+      "")))
 
 
 (comment
-  (let [[owner repo]   (github/repository->owner-repo (System/getenv "GITHUB_REPOSITORY"))
-        {:strs [jobs]} (github/actions-list-jobs
-                         {:github/owner          owner
-                          :github/repo           repo
-                          :github.actions/run-id (System/getenv "GITHUB_RUN_ID")})]
-    (tg/send-message
-      tg-token
-      tg-chat-id
-      (tg/render-html-message
-        rum/render-static-markup
-        ["Run "
-         [:a {:href (str (System/getenv "GITHUB_SERVER_URL") "/" (System/getenv "GITHUB_REPOSITORY") "/actions/runs/" (System/getenv "GITHUB_RUN_ID"))} (str "#" (System/getenv "GITHUB_RUN_NUMBER"))]
-         " "
-         [:a {:href (str (System/getenv "GITHUB_SERVER_URL") "/" (System/getenv "GITHUB_REPOSITORY"))} (System/getenv "GITHUB_REPOSITORY")]
-         " "
-         "(" [:a {:href (str (System/getenv "GITHUB_SERVER_URL") "/" (System/getenv "GITHUB_REPOSITORY") "/commit/" (System/getenv "GITHUB_SHA"))} (subs (System/getenv "GITHUB_SHA") 0 8)] ")"
-         " "
-         (str "by " (System/getenv "GITHUB_ACTOR"))
-         " "
-         (str "in " (actions-helper/format-took (Instant/parse (get-in jobs [0 "started_at"]))))])
-      {:parse_mode "HTML" :disable_web_page_preview true}))
-
-
-  (github/actions-run
-    {:github/owner          "ajchemist"
-     :github/repo           "github.clj.alpha"
-     :github.actions/run-id 613250891})
-
-
-  (github/actions-run-job
-    {:github/owner       "ajchemist"
-     :github/repo        "github.clj.alpha"
-     :github.jobs/job-id 2011145399})
+  (github/actions-list-jobs nil "ajchemist/user.core.async" 530723420)
+  (github/actions-run nil "ajchemist/user.core.async" 530723420)
+  (github/actions-run nil "ajchemist/github.clj.alpha" 613250891)
 
 
   (github/client
@@ -77,7 +60,23 @@
      :as     :json-strict-string-keys})
 
 
+  (github/actions-get-repo-public-key
+    {:basic-auth ["ajchemist" (pass "github.com/ajchemist/PAT/tools")]}
+    "ajchemist/github-playground")
+
+
+  (github/actions-put-repo-secret
+    {:basic-auth ["ajchemist" "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"]
+
+     :github/owner                         "ajchemist"
+     :github/repo                          "github-playground"
+     :github.actions.secrets/secret-name   "SECRET"
+     :github.actions.secrets/secret-value  "VALUE"
+     :github.actions.secrets/public-key    "DHysQfow8/38V1SWzekx3gtxmVqlShgYPiHznFIrBTU="
+     :github.actions.secrets/public-key-id "568250167242549743"})
+
+
   (->
-      (str)
-      (subs 2)
-      (str/replace #"(\d[HMS])(?!$)" "$1 ")))
+    (str)
+    (subs 2)
+    (str/replace #"(\d[HMS])(?!$)" "$1 ")))

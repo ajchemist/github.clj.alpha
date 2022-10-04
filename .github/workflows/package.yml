@@ -22,10 +22,14 @@ env:
   library: io.github.ajchemist/github.clj.alpha
 
 
+
+
+
 jobs:
   test:
     if: "!(contains(github.event.head_commit.message, 'ci skip') || contains(github.event.head_commit.message, 'skip ci'))"
     runs-on: ubuntu-latest
+    permissions: write-all
     strategy:
       matrix:
         clojure: [ "1.11" ]
@@ -62,8 +66,7 @@ jobs:
 
       - name: Test runner
         env:
-          TG_TOKEN: ${{ secrets.TG_TOKEN }}
-          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           clojure -X:provided:test:test-runner
 
@@ -89,7 +92,7 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.java-version }}
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@9.4
+        uses: DeLaGuardo/setup-clojure@9.5
         with:
           cli: ${{ env.clojure-cli }}
       - name: Cache clojure dependencies
@@ -142,11 +145,8 @@ jobs:
           clojure -X:provided:github-actions-helper telegram-job-digest
 
 
-      - uses: 8398a7/action-slack@v3.5.0
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # optional
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+      - name: Discord action job digest notification
+        uses: sarisia/actions-status-discord@v1
         if: always() # Pick up events even if the job fails or is canceled.
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
