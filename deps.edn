@@ -1,4 +1,9 @@
-{:paths ["src/core"]
+{
+ :tools/usage
+ {:ns-default github.core.alpha.tools}
+
+
+ :paths ["src/core"]
 
 
  :deps

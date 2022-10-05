@@ -130,9 +130,11 @@ jobs:
           git config --local user.name "ajchemist"
           git config --local user.email "1694505+ajchemist@users.noreply.github.com"
           git add -- pom.xml
-          git commit -m "$(clojure -X:build:maven-tool print-pom-version) [ci skip]"
+          VERSION="$(clojure -X:build:maven-tool print-pom-version)"
+          git commit -m "$VERSION [ci skip]"
+          git tag $VERSION
           git remote -v
-          git push
+          git push --tags
 
 
       - name: Job digest -> telegram
