@@ -1,4 +1,4 @@
-.lsp
+.lsp/.cache
 .cpcache
 .clj-kondo/.cache
 .eastwood
@@ -7,3 +7,6 @@
 
 .obsolete
 /target
+
+
+.github/secrets.pass.edn
