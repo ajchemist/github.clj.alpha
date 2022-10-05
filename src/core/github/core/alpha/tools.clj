@@ -37,5 +37,6 @@
           (when-some [secret-value (pass pass-name)]
             (github/actions-put-repo-secret
               {:basic-auth basic-auth}
-              repository secret-name secret-value)))
+              repository secret-name secret-value)
+            (println pass-name " -> " secret-name)))
         rs))))
