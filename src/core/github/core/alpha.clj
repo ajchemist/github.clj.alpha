@@ -34,7 +34,16 @@
 (def ^{:arglists '([request] [request respond raise])}
   client
   (-> http/request
-    (user.ring/wrap-meta-response)))
+    (user.ring/wrap-meta-response)
+    (user.ring/wrap-transform-request
+      (fn [params]
+        (update params :accept
+          #(or % "application/vnd.github+json"))))
+    (user.ring/wrap-transform-request
+      (fn [params]
+        (cond-> params
+          (find params :github/token)
+          (update-in params [:headers "Authorization"] #(or % (str "Bearer " (:github/token params)))))))))
 
 
 ;; * actions
@@ -147,10 +156,23 @@
     (-> params
       (assoc
         :url "https://api.github.com/user/repos"
-        :method       :post
+        :method :post
         :content-type :json
-        :as           :json-string-keys)
+        :as :json-string-keys)
       (assoc-in [:form-params "name"] name))))
+
+
+(defn create-org-repo
+  [params org name]
+  (client
+    (-> params
+      (assoc
+        :url (str "https://api.github.com/orgs/" org "/repos")
+        :method :post
+        :content-type :json
+        :as :json-strict-string-keys)
+      (assoc-in
+        [:form-params "name"] name))))
 
 
 (defn delete-repo

@@ -45,7 +45,22 @@
       {:basic-auth [(System/getenv "GITHUB_ACTOR") (System/getenv "GITHUB_TOKEN")]}
       (System/getenv "GITHUB_REPOSITORY")
       "TEST_SECRET"
-      "")))
+      ""))
+  )
+
+
+(comment
+  (github/create-org-repo
+    #_{:basic-auth ["ajchemist" (pass "github.com/tokens/ajchemist")]}
+    {:headers {"Authorization" (str "Bearer " (pass "github.com/tokens/ajchemist"))}}
+    "alchemiakr"
+    "test-repo-A")
+
+
+  (github/delete-repo
+    {:headers {"Authorization" (str "Bearer " (pass "github.com/tokens/ajchemist"))}}
+    "alchemiakr/test-repo-A")
+  )
 
 
 (comment
@@ -66,7 +81,7 @@
 
 
   (github/actions-put-repo-secret
-    {:basic-auth ["ajchemist" "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"]
+    {:basic-auth ["ajchemist" (pass "github.com/ajchemist/PAT/tools")]
 
      :github/owner                         "ajchemist"
      :github/repo                          "github-playground"

@@ -38,8 +38,11 @@
 
 
 (defn setup-secrets-from-pass
-  [{:keys [basic-auth repository :secrets.pass/edn-file]
-    :or   {edn-file secrets-pass-edn-file}}]
+  [{:keys [:secrets.pass/edn-file
+           :github/token
+           repository]
+    :or   {edn-file secrets-pass-edn-file}
+    :as   opts}]
   (cond
     (not (.exists (jio/as-file edn-file)))
     (println "[skip] setup-secrets-from-pass (no such file):" edn-file)
@@ -51,7 +54,7 @@
           (fn [[secret-name pass-name]]
             (when-some [secret-value (pass pass-name)]
               (github/actions-put-repo-secret
-                {:basic-auth basic-auth}
+                {:github/token (or token (pass (:github.token/pass-name opts)))}
                 repository secret-name secret-value)
               (println pass-name "->" secret-name)))
           rs)))))
@@ -63,16 +66,20 @@
     :as   opts}]
   (assert (.exists (jio/as-file edn-file)) (str ":repo/edn-file should be exists: " edn-file))
   (with-open [rdr (jio/reader (jio/as-file edn-file))]
-    (let [{:keys [repository basic-auth]} (edn/read (PushbackReader. rdr))
-          _                               (assert (vector? basic-auth))
-          basic-auth                      (update basic-auth 1 pass)
-          name                            (subs repository (inc (str/last-index-of repository "/")))]
-      (github/create-repo {:basic-auth basic-auth} name)
+    (let [{:keys [org repository :github/token]} (edn/read (PushbackReader. rdr))
+
+          name              (subs repository (inc (str/last-index-of repository "/")))
+          credential-params {:github/token (or token (pass (:github.token/pass-name opts)))}]
+      (cond
+        (and (string? org) (not (str/blank? org)))
+        (github/create-org-repo credential-params org name)
+
+        :else
+        (github/create-repo credential-params name))
       (setup-secrets-from-pass
         (-> opts
           (dissoc :repo/edn-file)
-          (assoc
-            :basic-auth basic-auth
-            :repository repository)))
+          ;; respect exec opts
+          (update :repository #(or % repository))))
       (sh-exit! (jsh/sh "git" "init"))
       (sh-exit! (jsh/sh "git" "remote" "add" "-f" "origin" (str "git@github.com:" repository))))))
