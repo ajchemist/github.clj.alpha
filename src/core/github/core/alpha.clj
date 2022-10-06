@@ -43,7 +43,7 @@
       (fn [params]
         (cond-> params
           (find params :github/token)
-          (update-in params [:headers "Authorization"] #(or % (str "Bearer " (:github/token params)))))))))
+          (update-in [:headers "Authorization"] #(or % (str "Bearer " (:github/token params)))))))))
 
 
 ;; * actions

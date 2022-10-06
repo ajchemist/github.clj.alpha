@@ -71,16 +71,20 @@
 
           name              (subs repository (inc (str/last-index-of repository "/")))
           credential-params {:github/token (or token (pass (:github.token/pass-name repo-edn)))}]
-      (cond
-        (and (string? org) (not (str/blank? org)))
-        (github/create-org-repo credential-params org name)
+      (as->
+        (cond
+          (and (string? org) (not (str/blank? org)))
+          (github/create-org-repo credential-params org name)
 
-        :else
-        (github/create-repo credential-params name))
+          :else
+          (github/create-repo credential-params name))
+        {:strs [html_url]}
+        (println "Repository created:" html_url))
       (setup-secrets-from-pass
         (-> opts
           (dissoc :repo/edn-file)
           ;; respect exec opts
+          (update :github/token #(or % (:github/token credential-params)))
           (update :repository #(or % repository))))
       (sh-exit! (jsh/sh "git" "init"))
       (sh-exit! (jsh/sh "git" "remote" "add" "-f" "origin" (str "git@github.com:" repository))))))
