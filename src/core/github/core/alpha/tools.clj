@@ -22,6 +22,7 @@
 (defn- pass
   "Return non-nil only if the secret exists in `pass-name`"
   [pass-name]
+  {:pre [(string? pass-name) (not (str/blank? pass-name))]}
   (let [{:keys [exit out err]} (jsh/sh "pass" "show" pass-name)]
     (when err (println err))
     (cond
@@ -66,10 +67,10 @@
     :as   opts}]
   (assert (.exists (jio/as-file edn-file)) (str ":repo/edn-file should be exists: " edn-file))
   (with-open [rdr (jio/reader (jio/as-file edn-file))]
-    (let [{:keys [org repository :github/token]} (edn/read (PushbackReader. rdr))
+    (let [{:keys [org repository :github/token] :as repo-edn} (edn/read (PushbackReader. rdr))
 
           name              (subs repository (inc (str/last-index-of repository "/")))
-          credential-params {:github/token (or token (pass (:github.token/pass-name opts)))}]
+          credential-params {:github/token (or token (pass (:github.token/pass-name repo-edn)))}]
       (cond
         (and (string? org) (not (str/blank? org)))
         (github/create-org-repo credential-params org name)
