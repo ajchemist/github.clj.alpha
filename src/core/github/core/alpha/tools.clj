@@ -14,7 +14,9 @@
 
 (defn sh-exit!
   [{:keys [exit out err] :as sh-return}]
-  (println (str err out))
+  (let [output (str err out)]
+    (when-not (str/blank? output)
+      (println output)))
   (when-not (zero? exit)
     (throw (ex-info "Non-zero exit." sh-return))))
 
@@ -23,8 +25,9 @@
   "Return non-nil only if the secret exists in `pass-name`"
   [pass-name]
   {:pre [(string? pass-name) (not (str/blank? pass-name))]}
-  (let [{:keys [exit out err]} (jsh/sh "pass" "show" pass-name)]
-    (when err (println err))
+  (let [{:keys [exit out err]} (jsh/sh "pass" "show" pass-name)
+        err-output             (str err)]
+    (when-not (str/blank? err-output) (println err-output))
     (cond
       (not (zero? exit))
       nil
@@ -71,20 +74,28 @@
 
           name              (subs repository (inc (str/last-index-of repository "/")))
           credential-params {:github/token (or token (pass (:github.token/pass-name repo-edn)))}]
-      (as->
-        (cond
-          (and (string? org) (not (str/blank? org)))
-          (github/create-org-repo credential-params org name)
+      (try
+        (github/get-repo credential-params repository)
+        (catch Exception e
+          (case (:status (ex-data e))
+            404
+            (as->
+              (cond
+                (and (string? org) (not (str/blank? org)))
+                (github/create-org-repo credential-params org name)
 
-          :else
-          (github/create-repo credential-params name))
-        {:strs [html_url]}
-        (println "Repository created:" html_url))
+                :else
+                (github/create-repo credential-params name))
+              {:strs [html_url]}
+              (println "Repository created:" html_url))
+
+            (println ::setup (ex-message e) (ex-data e)))))
       (setup-secrets-from-pass
         (-> opts
           (dissoc :repo/edn-file)
           ;; respect exec opts
           (update :github/token #(or % (:github/token credential-params)))
           (update :repository #(or % repository))))
-      (sh-exit! (jsh/sh "git" "init"))
-      (sh-exit! (jsh/sh "git" "remote" "add" "-f" "origin" (str "git@github.com:" repository))))))
+      (when-not (.exists (jio/file ".git"))
+        (sh-exit! (jsh/sh "git" "init"))
+        (sh-exit! (jsh/sh "git" "remote" "add" "-f" "origin" (str "git@github.com:" repository)))))))

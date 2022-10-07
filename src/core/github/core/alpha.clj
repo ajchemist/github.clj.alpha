@@ -150,6 +150,16 @@
                         public-key-id (assoc :key_id public-key-id)))))))
 
 
+(defn get-repo
+  [params repository]
+  (client
+    (-> params
+      (assoc
+        :url (str "https://api.github.com/repos/" repository)
+        :method :get
+        :as :json-string-keys))))
+
+
 (defn create-repo
   [params name]
   (client

@@ -50,6 +50,14 @@
 
 
 (comment
+  (try
+    (github/get-repo
+      {:headers {"Authorization" (str "Bearer " (pass "github.com/tokens/ajchemist"))}}
+      "ajchemist/clojure-templates")
+    (catch Exception e
+      (:status (ex-data e))))
+
+
   (github/create-org-repo
     #_{:basic-auth ["ajchemist" (pass "github.com/tokens/ajchemist")]}
     {:headers {"Authorization" (str "Bearer " (pass "github.com/tokens/ajchemist"))}}
