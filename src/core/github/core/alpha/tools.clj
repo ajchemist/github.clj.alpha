@@ -35,6 +35,11 @@
       (str/index-of out (str pass-name "\n├── ")) ; dir entry check
       nil
 
+      (str/index-of out "content-disposition: attachment;")
+      (let [tmpf (File/createTempFile "pass-copy-" "")]
+        (jsh/sh "gopass" "fscopy" pass-name (.getPath tmpf))
+        (slurp tmpf))
+
       :else (str/trim-newline out))))
 
 
