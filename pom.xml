@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.ajchemist</groupId>
   <artifactId>github.clj.alpha</artifactId>
-  <version>2022.280.33962</version>
+  <version>2022.286.24687</version>
   <scm>
     <url>https://github.com/ajchemist/github.clj.alpha</url>
   </scm>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>1.0.206</version>
+      <version>1.0.214</version>
     </dependency>
     <dependency>
       <groupId>clj-http</groupId>
