@@ -103,5 +103,5 @@
           (update :repository #(or % repository))))
       (when-not (.exists (jio/file ".git"))
         (sh-exit! (jsh/sh "git" "init"))
-        (sh-exit! (jsh/sh "git" "branch" "-m" "master" "main"))
+        (jsh/sh "git" "branch" "-m" "master" "main") ; try, no exit at non-zero code
         (sh-exit! (jsh/sh "git" "remote" "add" "-f" "origin" (str "git@github.com:" repository)))))))
