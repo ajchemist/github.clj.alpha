@@ -8,12 +8,13 @@
 
  :deps
  {
-  buddy/buddy-sign              {:mvn/version "3.4.333"}
-  caesium/caesium               {:mvn/version "0.15.0"}
-  cheshire/cheshire             {:mvn/version "5.11.0"}
-  clj-http/clj-http             {:mvn/version "3.12.3"}
-  io.github.ajchemist/user.ring {:mvn/version "2022.39.7172"}
-  org.clojure/tools.cli         {:mvn/version "1.0.214"}
+  buddy/buddy-sign                            {:mvn/version "3.4.333"}
+  caesium/caesium                             {:mvn/version "0.15.0"}
+  cheshire/cheshire                           {:mvn/version "5.11.0"}
+  clj-http/clj-http                           {:mvn/version "3.12.3"}
+  io.github.ajchemist/user.ring               {:mvn/version "2022.39.7172"}
+  io.github.ajchemist/passwordstore.clj.alpha {:mvn/version "2023.99.23506"}
+  org.clojure/tools.cli                       {:mvn/version "1.0.214"}
   }
 
 

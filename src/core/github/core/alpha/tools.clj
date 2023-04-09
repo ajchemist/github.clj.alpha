@@ -4,6 +4,7 @@
    [clojure.java.io :as jio]
    [clojure.java.shell :as jsh]
    [clojure.edn :as edn]
+   [ajchemist.passwordstore.core.alpha :as pass]
    [github.core.alpha :as github]
    )
   (:import
@@ -19,28 +20,6 @@
       (println output)))
   (when-not (zero? exit)
     (throw (ex-info "Non-zero exit." sh-return))))
-
-
-(defn- pass
-  "Return non-nil only if the secret exists in `pass-name`"
-  [pass-name]
-  {:pre [(string? pass-name) (not (str/blank? pass-name))]}
-  (let [{:keys [exit out err]} (jsh/sh "pass" "show" pass-name)
-        err-output             (str err)]
-    (when-not (str/blank? err-output) (println err-output))
-    (cond
-      (not (zero? exit))
-      nil
-
-      (str/index-of out (str pass-name "\n├── ")) ; dir entry check
-      nil
-
-      (str/index-of out "content-disposition: attachment;")
-      (let [tmpf (File/createTempFile "pass-copy-" "")]
-        (jsh/sh "gopass" "fscopy" pass-name (.getPath tmpf))
-        (slurp tmpf))
-
-      :else (str/trim-newline out))))
 
 
 (def ^File ^:private secrets-pass-edn-file (jio/file ".github" "secrets.pass.edn"))
@@ -61,9 +40,9 @@
       (let [rs (edn/read (PushbackReader. rdr))]
         (run!
           (fn [[secret-name pass-name]]
-            (when-some [secret-value (pass pass-name)]
+            (when-some [secret-value (pass/show pass-name)]
               (github/actions-put-repo-secret
-                {:github/token (or token (pass (:github.token/pass-name opts)))}
+                {:github/token (or token (pass/show (:github.token/pass-name opts)))}
                 repository secret-name secret-value)
               (println pass-name "->" secret-name)))
           rs)))))
@@ -78,7 +57,7 @@
     (let [{:keys [org repository :github/token] :as repo-edn} (edn/read (PushbackReader. rdr))
 
           name              (subs repository (inc (str/last-index-of repository "/")))
-          credential-params {:github/token (or token (pass (:github.token/pass-name repo-edn)))}]
+          credential-params {:github/token (or token (pass/show (:github.token/pass-name repo-edn)))}]
       (try
         (github/get-repo credential-params repository)
         (catch Exception e
